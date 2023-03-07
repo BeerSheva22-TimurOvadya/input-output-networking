@@ -1,15 +1,18 @@
 package telran.io.test;
 
 import java.io.*;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class InputOutputTest {
-	private static final int SPACE = 4;
+	private static final int SPACES_LEVEL = 2;
 	String fileName = "myFile";
 	String directoryName = "myDirectory1/myDirectory2";
 
@@ -31,28 +34,46 @@ class InputOutputTest {
 	}
 
 	@Test
-//	@Disabled
+	@Disabled
 	void printDirectoryFileTest() throws IOException {
-		String directory = "C:\\Program Files\\Java\\jdk-17.0.5";
-		printDirectoryFile(directory, 1);
+		System.out.println("*********************************Applying class File*********************");
+		printDirectoryFile("..", 1);
 	}
 
 	void printDirectoryFile(String path, int maxLevel) throws IOException {
-		if (maxLevel < 1) {
-			maxLevel = Integer.MAX_VALUE;
+		// TODO based on class File
+		// path -directory path
+		// maxLevel - maximal level of printing, if maxLevel < 1, all levels should be
+		// printed
+		// output format
+		// <directory name (no points, no full absolute path)
+		// <node name> - dir | file
+		// <node_name> .....
+		// <node name> -
+		// <node name> - dir | file
+		// <node_name> .....
+		// <node name> -
+		File root = new File(path);
+		if (root.isDirectory()) {
+			if (maxLevel < 1) {
+				maxLevel = Integer.MAX_VALUE;
+			}
+			System.out.println(root.getCanonicalFile().getName());
+			printDirectory(root.listFiles(), maxLevel, 1);
 		}
-		File directory = new File(path).getCanonicalFile();
-		printDirectoryFile(directory, maxLevel, 0);
 	}
 
-	void printDirectoryFile(File file, int maxLevel, int currentLevel) {
-		if (maxLevel >= currentLevel) {
-			String type = file.isDirectory() ? "dir" : "file";
-			System.out.printf("%s%s (%s)\n", " ".repeat(currentLevel * SPACE), file.getName(), type);
-			if (file.isDirectory()) {
-				Arrays.stream(file.listFiles()).forEach(n -> printDirectoryFile(n, maxLevel, currentLevel + 1));
-			}
+	private void printDirectory(File[] listFiles, int maxLevel, int level) {
+		if (level <= maxLevel) {
+			Arrays.stream(listFiles).forEach(node -> {
+				System.out.printf("%s%s - %s\n", " ".repeat(level * SPACES_LEVEL), node.getName(),
+						node.isFile() ? "file" : "dir");
+				if (node.isDirectory()) {
+					printDirectory(node.listFiles(), maxLevel, level + 1);
+				}
+			});
 		}
+
 	}
 
 	@Test
@@ -64,21 +85,34 @@ class InputOutputTest {
 	}
 
 	@Test
-//	@Disabled
+	@Disabled
 	void printDirectoryFilesTest() throws IOException {
-		Path directory = Path.of("C:\\Program Files\\Java\\jdk-17.0.5");
-		printDirectoryFiles(directory, 1);
+		System.out.println("*********************************Applying Class Files*********************");
+		printDirectoryFiles("..", 2);
 	}
 
-	void printDirectoryFiles(Path directory, int maxLevel) throws IOException {
-		if (maxLevel < 1) {
-			maxLevel = Integer.MAX_VALUE;
+	void printDirectoryFiles(String path, int maxLevel) throws IOException {
+		// TODO based on class Files
+		// path -directory path
+		// maxLevel - maximal level of printing, if maxLevel < 1, all levels should be
+		// printed
+		// output format
+		// <directory name (no points, no full absolute path)
+		// <node name> - dir | file
+		// <node_name> .....
+		// <node name> -
+		// <node name> - dir | file
+		// <node_name> .....
+		// <node name>
+
+		Path directory = Path.of(path);
+		if (Files.isDirectory(directory)) {
+			directory = directory.toAbsolutePath().normalize();
+			int directoryLevel = directory.getNameCount();
+			Files.walk(directory, maxLevel).forEach(node -> {
+				System.out.printf("%s%s - %s\n", " ".repeat((node.getNameCount() - directoryLevel) * SPACES_LEVEL),
+						node.getFileName(), Files.isDirectory(node) ? "dir" : "file");
+			});
 		}
-		System.out.println(directory.toAbsolutePath().getFileName());
-		Files.walk(directory, maxLevel).filter(dir -> dir != directory)
-				.forEach(dir -> System.out.printf("%s%s (%s)\n",
-						" ".repeat((dir.getNameCount() - directory.getNameCount()) * SPACE), dir.getFileName(),
-						Files.isDirectory(dir) ? "dir" : "file"));
 	}
-
 }
