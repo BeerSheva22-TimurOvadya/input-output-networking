@@ -11,13 +11,10 @@ public class LoggerRecord {
 	public final String message;
 
 	public LoggerRecord(Instant timestamp, String zoneId, Level level, String loggerName, String message) {
-		super();
 		this.timestamp = timestamp;
 		this.zoneId = zoneId;
 		this.level = level;
 		this.loggerName = loggerName;
 		this.message = message;
 	}
-
-	
 }

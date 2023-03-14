@@ -41,7 +41,7 @@ class InputOutputTest {
 	}
 
 	void printDirectoryFile(String path, int maxLevel) throws IOException {
-		// TODO based on class File
+		
 		// path -directory path
 		// maxLevel - maximal level of printing, if maxLevel < 1, all levels should be
 		// printed
@@ -92,7 +92,7 @@ class InputOutputTest {
 	}
 
 	void printDirectoryFiles(String path, int maxLevel) throws IOException {
-		// TODO based on class Files
+		
 		// path -directory path
 		// maxLevel - maximal level of printing, if maxLevel < 1, all levels should be
 		// printed

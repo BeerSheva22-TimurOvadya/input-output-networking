@@ -1,48 +1,102 @@
 package telran.io.Logger.test;
 
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import telran.io.Logger.*;
 
 class LoggerTests {
-
+	private static final String LOGGER_FILE = "logFile.txt";
 	Handler handler;
 	Logger logger;
+	BufferedReader reader;
 
-	@Test
-	void loggerFileTest() throws Exception {
-		File LogTxtFile = new File("log.txt");
-		PrintStream printStream = new PrintStream(LogTxtFile);
-		handler = new SimpleStreamHandler(printStream);
-		logerSetLevel();
-		logsEntry();
-
+	@BeforeEach
+	void setUp() throws FileNotFoundException {
+		File file = new File(LOGGER_FILE);
+		
+		handler = new SimpleStreamHandler(new PrintStream(file));
+		logger = new Logger(handler, "test-logger");
+		reader = new BufferedReader(new FileReader(file));
 	}
 
-	private void logerSetLevel() {
-		logger = new Logger(handler, "TEST");
+	private void logging() {
+		logger.error("error messaqwge");
+		logger.warn("warn message");
+		logger.info("info message");
+		logger.debug("debug message");
+		logger.trace("trace message");
+	}
+
+	@Test
+	void errorTest() {
 		logger.setLevel(Level.ERROR);
-		logger.setLevel(Level.WARN);
-		logger.setLevel(Level.INFO);
-		logger.setLevel(Level.DEBUG);
-		logger.setLevel(Level.TRACE);
-	}
+		logging();
+		String[] levels = { Level.ERROR.toString() };
+		runTestContent(levels);
 
-	private void logsEntry() {
-		logger.error("***ERROR***");
-		logger.warn("***WARN***");
-		logger.info("***INFO***");
-		logger.debug("***DEBUG***");
-		logger.trace("***TRACE***");
 	}
 
 	@Test
-	void loggerConsoleTest() {
-		handler = new SimpleStreamHandler(System.err);
-		logerSetLevel();
-		logsEntry();
+	void warnTest() {
+		logger.setLevel(Level.WARN);
+		logging();
+		String[] levels = { Level.ERROR.toString(), Level.WARN.toString() };
+		runTestContent(levels);
+
+	}
+
+	@Test
+	void infoTest() {
+		logger.setLevel(Level.INFO);
+		logging();
+		String[] levels = { Level.ERROR.toString(), Level.WARN.toString(), Level.INFO.toString() };
+		runTestContent(levels);
+
+	}
+
+	@Test
+	void debugTest() {
+		logger.setLevel(Level.DEBUG);
+		logging();
+		String[] levels = { Level.ERROR.toString(), Level.WARN.toString(), Level.INFO.toString(),
+				Level.DEBUG.toString() };
+		runTestContent(levels);
+
+	}
+
+	@Test
+	void traceTest() {
+		logger.setLevel(Level.TRACE);
+		logging();
+		String[] levels = { Level.ERROR.toString(), Level.WARN.toString(), Level.INFO.toString(),
+				Level.DEBUG.toString(), Level.TRACE.toString() };
+		runTestContent(levels);
+
+	}
+
+	@Test
+	void consoleTest() {
+		handler = new SimpleStreamHandler(System.out);
+		logger = new Logger(handler, "logger-console-test");
+
+		System.out.println("***********************Logger for console******************");
+		System.out.println("******Should contain 3 logger records for ERROR, WARN and INFO levels******************");
+		logging();
+	}
+
+	private void runTestContent(String[] levels) {
+		List<String> records = reader.lines().collect(Collectors.toCollection(ArrayList::new));
+		assertEquals(levels.length, records.size());
+		IntStream.range(0, levels.length).forEach(i -> assertTrue(records.get(i).contains(levels[i])));
+
 	}
 
 }
