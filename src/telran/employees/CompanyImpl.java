@@ -23,7 +23,8 @@ public class CompanyImpl implements Company {
 
 	@Override
 	public boolean addEmployee(Employee emplo) {
-		boolean res = emploId.put(emplo.getId(), emplo) == null;
+		long id = emplo.getId();
+		boolean res = emploId.put(id, emplo) == null;
 		emploBirth.computeIfAbsent(emplo.getBirthDate().getMonthValue(), x -> new ArrayList<>()).add(emplo);
 		emploDepart.computeIfAbsent(emplo.getDepartment(), x -> new ArrayList<>()).add(emplo);
 		emploSal.computeIfAbsent(emplo.getSalary(), x -> new ArrayList<>()).add(emplo);
