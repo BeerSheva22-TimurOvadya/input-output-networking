@@ -1,4 +1,4 @@
-package telran.Util.Logger;
+package telran.util;
 
 import java.time.Instant;
 import java.time.ZoneId;

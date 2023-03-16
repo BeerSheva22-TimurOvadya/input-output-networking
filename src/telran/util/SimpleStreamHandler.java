@@ -1,4 +1,4 @@
-package telran.Util.Logger;
+package telran.util;
 
 import java.io.*;
 import java.time.LocalDateTime;
