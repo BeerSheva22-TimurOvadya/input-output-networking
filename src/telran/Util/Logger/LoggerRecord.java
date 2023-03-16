@@ -1,4 +1,4 @@
-package telran.io.Logger;
+package telran.Util.Logger;
 
 import java.time.Instant;
 
