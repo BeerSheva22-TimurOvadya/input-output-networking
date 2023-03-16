@@ -1,112 +1,118 @@
 package telran.employees.test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import telran.employees.*;
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CompanyTest {
-
-	String path = "Company.txt";
-	Company company = new CompanyImpl();	
-
-	Employee Vasya = new Employee(1, "Vasya", LocalDate.of(1990, 12, 26), "Financial department", 6700);
-	Employee Nikolay = new Employee(2, "Nikolay", LocalDate.of(1975, 2, 20), "Financial department", 12500);
-	Employee Sergey = new Employee(3, "Sergey", LocalDate.of(1495, 1, 18), "Security department", 10000);
-	Employee Masha = new Employee(4, "Masha", LocalDate.of(1986, 03, 25), "Security department", 8000);
-	Employee Alina = new Employee(5, "Alina", LocalDate.of(1994, 03, 23), "Sales department", 12500);
-	Employee Vova = new Employee(6, "Vova", LocalDate.of(1853, 1, 1), "Sales department", 10000);
-
+private static final long ID1 = 123;
+private static final int MONTH1 = 1;
+private static final String DEPARTMENT1 = "department1";
+private static final int SALARY1 = 1000;
+private static final long ID2 = 124;
+private static final String DEPARTMENT2 = "department2";
+private static final int SALARY2 = 2000;
+private static final LocalDate BIRTH2 = LocalDate.of(2000, MONTH1, 1);
+private static final int MONTH2 = 2;
+private static final int SALARY3 = 3000;
+private static final long ID3 = 125;
+private static final int SALARY4 = 4000;
+private static final long ID4 = 126;
+private static final long ID10 = 100000;
+private static final String FILE_NAME = "test.data";
+Employee empl1 = new Employee(ID1, "name", LocalDate.of(2000, MONTH1, 1), DEPARTMENT1, SALARY1);
+Employee empl2 = new Employee(ID2, "name", LocalDate.of(2000, MONTH1, 1), DEPARTMENT2, SALARY2);
+Employee empl3 = new Employee(ID3, "name", LocalDate.of(2000, MONTH2, 1), DEPARTMENT1, SALARY3);
+Employee empl4 = new Employee(ID4, "name", LocalDate.of(2000, MONTH1, 1), DEPARTMENT2, SALARY4);
+Employee[] employees = {empl1, empl2, empl3, empl4};
+Company company;
 	@BeforeEach
-	void setUp()  {
-		company.addEmployee(Vasya);
-		company.addEmployee(Nikolay);
-		company.addEmployee(Sergey);
-		company.addEmployee(Masha);
-		company.addEmployee(Alina);
-		company.addEmployee(Vova);
-	}
-
-	@Test
-	void getDepartmentTest() {
-		Employee[] expected1 = { Vasya, Nikolay };
-		assertArrayEquals(expected1, arrayDepartment("Financial department"));
-
-		Employee[] expected2 = {Sergey, Masha };
-		assertArrayEquals(expected2, arrayDepartment("Security department"));
-
-		Employee[] expected3 = { Alina, Vova };
-		assertArrayEquals(expected3, arrayDepartment("Sales department"));
-	}
-
-	private Object[] arrayDepartment(String departament) {
-		return company.getEmployeesByDepartment(departament).stream().sorted(Comparator.comparingLong(Employee::getId))
-				.toArray(Employee[]::new);
-	}
-	
-
-	@Test
-	void getSalaryTest() {
-
-		Employee[] expected1 = { Nikolay, Alina };
-		assertArrayEquals(expected1, arraySalary(12000, 50000));
-
-		Employee[] expected2 = { Vasya, Nikolay, Sergey, Masha, Alina, Vova, };
-		assertArrayEquals(expected2, arraySalary(0, 20000));
-
-		Employee[] expected3 = { Nikolay, Sergey, Alina, Vova };
-		assertArrayEquals(expected3, arraySalary(9900, 12501));
-	}
-
-	private Object[] arraySalary(int from, int to) {
-		return company.getEmployeesBySalary(from, to).stream().sorted(Comparator.comparingLong(Employee::getId))
-				.toArray(Employee[]::new);
-	}
-
-	@Test
-	void getEmployeesByMonthBirthTest() {
-		Employee[] expected1 = { Masha, Alina };
-		assertArrayEquals(expected1, arraymonthBirth(3));
-
-		Employee[] expected2 = { Sergey, Vova };
-		assertArrayEquals(expected2, arraymonthBirth(1));
-
-		Employee[] expected3 = { Nikolay };
-		assertArrayEquals(expected3, arraymonthBirth(2));		
-	}
-
-	private Employee[] arraymonthBirth(int month) {
-		return company.getEmployeesByMonthBirth(month).stream().sorted(Comparator.comparingLong(Employee::getId))
-				.toArray(Employee[]::new);
-	}
-
-	@Test
-	void removeTest() {
-		Employee employee = company.removeEmployee(3);
-		assertEquals("Sergey", employee.getName());
-		assertNull(company.getEmployee(3));		
-	}
-
-	@Test
-	void saveTest() throws Exception {
-		company.save(path);
-	}
-	
-	@Test
-	 void restoreCompany() throws Exception {		
+	void setUp() throws Exception {
 		company = new CompanyImpl();
-		company.restore(path);
+		for(Employee empl: employees) {
+			company.addEmployee(empl);
+		}
+	}
+
+	@Test
+	void addEmployeeTest() {
+		Employee newEmployee = new Employee(ID10, DEPARTMENT2, BIRTH2, DEPARTMENT1, SALARY1);
+		assertTrue(company.addEmployee(newEmployee));
+		assertFalse(company.addEmployee(newEmployee));
+	}
+	@Test
+	void removeEmployeeTest() {
+		assertEquals(empl1, company.removeEmployee(ID1));
+		assertNull(company.removeEmployee(ID1));
+		runTest(new Employee[] {empl2, empl3, empl4});
+		
+	}
+	@Test
+	void employeesByMonthTest() {
+		assertTrue(company.getEmployeesByMonthBirth(20).isEmpty());
+		Employee[] expected = {empl1, empl2, empl4};
+		Employee[] actual = company.getEmployeesByMonthBirth(MONTH1).toArray(Employee[]::new);
+		Arrays.sort(actual);
+		assertArrayEquals(expected, actual);
+		company.removeEmployee(ID1);
+		company.removeEmployee(ID2);
+		company.removeEmployee(ID4);
+		assertTrue(company.getEmployeesByMonthBirth(MONTH1).isEmpty());
+	}
+	@Test
+	void employeesByDepartmentTest() {
+		assertTrue(company.getEmployeesByDepartment("gggggg").isEmpty());
+		Employee[] expected = {empl2, empl4};
+		Employee[] actual = company.getEmployeesByDepartment(DEPARTMENT2).toArray(Employee[]::new);
+		Arrays.sort(actual);
+		assertArrayEquals(expected, actual);
+		company.removeEmployee(ID2);
+		company.removeEmployee(ID4);
+		assertTrue(company.getEmployeesByDepartment(DEPARTMENT2).isEmpty());
+		
+	}
+	@Test
+	void employeesBySalaryTest() {
+		assertTrue(company.getEmployeesBySalary(100000000,100000100).isEmpty());
+		Employee[] expected = {empl1, empl2, empl3};
+		Employee[] actual = company.getEmployeesBySalary(SALARY1, SALARY3).toArray(Employee[]::new);
+		Arrays.sort(actual);
+		assertArrayEquals(expected, actual);
+		company.removeEmployee(ID1);
+		company.removeEmployee(ID2);
+		company.removeEmployee(ID3);
+		assertTrue(company.getEmployeesBySalary(SALARY1, SALARY3).isEmpty());
+	}
+
+	private void runTest(Employee[] expected) {
+		Employee[]actual = company.getAllEmployees().toArray(Employee[]::new);
+		Arrays.sort(actual);
+		assertArrayEquals(expected, actual);
+		
 	}
 	
 	@Test
-	void restorePrintingTest() throws Exception {
-		Company companyRestored = new CompanyImpl();
-		companyRestored.restore(path);
-		companyRestored.getAllEmployees()
-				.forEach(e -> System.out.printf("ID: %d, NAME: %s, BIRTH DAY: %s, DEPARTMENT: %s, SALARY: %d.\n",
-						e.getId(), e.getName(), e.getBirthDate().toString(), e.getDepartment(), e.getSalary()));
+	@Order(1)
+	void saveTest() {
+		company.save(FILE_NAME);
 	}
+	@Test
+	@Order(2)
+	void restoreTest() {
+		Company company2 = new CompanyImpl();
+		company2.restore(FILE_NAME);
+		assertIterableEquals(company, company2);
+	}
+	
+	
+
 }
