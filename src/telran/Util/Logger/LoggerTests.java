@@ -1,4 +1,4 @@
-package telran.io.Logger.test;
+package telran.Util.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,8 +9,6 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import telran.io.Logger.*;
 
 class LoggerTests {
 	private static final String LOGGER_FILE = "logFile.txt";

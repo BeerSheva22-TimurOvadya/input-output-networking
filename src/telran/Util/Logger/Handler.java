@@ -1,4 +1,4 @@
-package telran.io.Logger;
+package telran.Util.Logger;
 
 public interface Handler {
 	void publish(LoggerRecord loggerRecord);
