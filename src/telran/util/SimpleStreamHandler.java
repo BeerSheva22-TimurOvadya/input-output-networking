@@ -16,7 +16,5 @@ public class SimpleStreamHandler implements Handler {
 	public void publish(LoggerRecord loggerRecord) {
 		LocalDateTime ldt = LocalDateTime.ofInstant(loggerRecord.timestamp, ZoneId.of(loggerRecord.zoneId));
 		stream.printf("%s %s %s %s\n", ldt, loggerRecord.level, loggerRecord.loggerName, loggerRecord.message);
-
 	}
-
 }
