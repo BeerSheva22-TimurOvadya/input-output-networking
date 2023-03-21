@@ -5,6 +5,8 @@ import java.net.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import telran.net.application.ServerLogAppl;
+
 public class TcpClientHandler implements Handler {
 	private static final String LOG_TYPE_REQUEST = "log";
 	private static final String OK = "ok";
@@ -31,7 +33,7 @@ public class TcpClientHandler implements Handler {
 		stream.println(LOG_TYPE_REQUEST + "#" + message);
 		try {
 			String response = input.readLine();
-			if (!response.equals(OK)) {
+			if (!response.equals(ServerLogAppl.OK)) {
 				throw new RuntimeException("Response from Logger Server is " + response);
 			}
 		} catch (IOException e) {
