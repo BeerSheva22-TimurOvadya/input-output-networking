@@ -15,7 +15,7 @@ public class TcpServer implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Server listening on  port " + this.port);
+		System.out.println("Tcp Server listening on  port " + this.port);
 		while (true) {
 			try {
 				Socket socket = serverSocket.accept();
