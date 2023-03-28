@@ -1,12 +1,14 @@
 package telran.employees.test;
 
-import telran.employees.*;
+import org.junit.jupiter.api.BeforeEach;
 
-public class CompanyImplTest extends CompanyNetworkTest {
+import telran.employees.CompanyImpl;
 
+public class CompanyImplTest extends CompanyTest {
+	@BeforeEach
 	@Override
-	protected Company getCompany() {
-		return new CompanyImpl();
+	void setUp() throws Exception {
+		company = new CompanyImpl();
+		super.setUp();
 	}
-
 }
