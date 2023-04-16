@@ -8,18 +8,18 @@ public class Menu implements Item {
 	private static final int STARS_AMOUNT = 20;
 	private String name;
 	private ArrayList<Item> items;
-	
+
 	public Menu(String name, ArrayList<Item> items) {
 		this.name = name;
 		this.items = items;
 	}
-	
 	public Menu(String name, Item ...items) {
 		this(name, new ArrayList<>(Arrays.asList(items)));
 	}
-	
+
 	@Override
-	public String displayName() {		
+	public String displayName() {
+		
 		return name;
 	}
 
@@ -30,7 +30,8 @@ public class Menu implements Item {
 			while(running) {
 				displayTitle(io);
 				displayItems(io);
-				int itemNumber = io.readInt("Enter item number", "Wrong item number", 1, items.size());
+				int itemNumber = io.readInt("Enter item number", "Wrong item number",
+						1, items.size());
 				Item item = items.get(itemNumber - 1);
 				item.perform(io);
 				if(item.isExit()) {
@@ -40,28 +41,25 @@ public class Menu implements Item {
 		} catch (Exception e) {
 			io.writeLine(e.getMessage());
 		}
-		io.writeLine("Thanks & Goodbya");
+		
 
 	}
 
 	private void displayItems(InputOutput io) {
-		IntStream.rangeClosed(1, items.size()).forEach(i -> 
+		IntStream.rangeClosed(1, items.size()).forEach(i ->
 		io.writeLine(String.format("%d. %s", i, items.get(i - 1).displayName())));
 		
 	}
-
 	private void displayTitle(InputOutput io) {
 		io.writeLine("*".repeat(STARS_AMOUNT));
 		io.writeLine(String.format("*%s%s", " ".repeat(STARS_AMOUNT / 4), name));
 		io.writeLine("*".repeat(STARS_AMOUNT));
 		
 	}
-
 	@Override
-	public boolean isExit() {		
+	public boolean isExit() {
+		
 		return false;
 	}
-
-	
 
 }
