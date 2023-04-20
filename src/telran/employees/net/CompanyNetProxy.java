@@ -78,4 +78,18 @@ public class CompanyNetProxy implements Company, Closeable {
 		
 	}
 
+	@Override
+	public Employee updateSalary(long emplId, int newSalary) {
+		return null;
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Employee updateDepartment(long emplId, String department) {
+		return null;
+		// TODO Auto-generated method stub
+		
+	}
+
 }

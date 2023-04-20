@@ -1,6 +1,7 @@
 package telran.employees;
 
 import java.util.*;
+import java.util.concurrent.locks.*;
 import java.io.*;
 
 public class CompanyImpl implements Company {
@@ -11,23 +12,44 @@ public class CompanyImpl implements Company {
 	private HashMap<String, Set<Employee>> employeesDepartment = new HashMap<>();
 	private TreeMap<Integer, Set<Employee>> employeesSalary = new TreeMap<>();
 
+	
+	private final ReadWriteLock employeesLock = new ReentrantReadWriteLock();
+	Lock writeEmployeesLock = employeesLock.writeLock();
+	Lock readEmployeesLock = employeesLock.readLock();
+
+	private final ReadWriteLock employeesMonthLock = new ReentrantReadWriteLock();
+	Lock writeEmployeesMonthLock = employeesMonthLock.writeLock();
+	Lock readEmployeesMonthLock = employeesMonthLock.readLock();
+
+	private final ReadWriteLock employeesDepartmentLock = new ReentrantReadWriteLock();
+	Lock writeEmployeesDepartmentLock = employeesDepartmentLock.writeLock();
+	Lock readEmployeesDepartmentLock = employeesDepartmentLock.readLock();
+
+	private final ReadWriteLock employeesSalaryLock = new ReentrantReadWriteLock();
+	Lock writeEmployeesSalaryLock = employeesSalaryLock.writeLock();
+	Lock readEmployeesSalaryLock = employeesSalaryLock.readLock();
+
 	@Override
 	public Iterator<Employee> iterator() {
-
 		return getAllEmployees().iterator();
 	}
 
 	@Override
 	public boolean addEmployee(Employee empl) {
-		boolean res = false;
-		if (employees.putIfAbsent(empl.id, empl) == null) {
-			res = true;
-			addIndexMap(employeesMonth, empl.getBirthDate().getMonthValue(), empl);
-			addIndexMap(employeesDepartment, empl.getDepartment(), empl);
-			addIndexMap(employeesSalary, empl.getSalary(), empl);
-		}
+		lock(writeEmployeesLock, writeEmployeesMonthLock, writeEmployeesDepartmentLock, writeEmployeesSalaryLock);
+		try {
+			boolean res = false;
+			if (employees.putIfAbsent(empl.id, empl) == null) {
+				res = true;
+				addIndexMap(employeesMonth, empl.getBirthDate().getMonthValue(), empl);
+				addIndexMap(employeesDepartment, empl.getDepartment(), empl);
+				addIndexMap(employeesSalary, empl.getSalary(), empl);
+			}
 
-		return res;
+			return res;
+		} finally {
+			unlock(writeEmployeesLock, writeEmployeesMonthLock, writeEmployeesDepartmentLock, writeEmployeesSalaryLock);
+		}
 	}
 
 	private <T> void addIndexMap(Map<T, Set<Employee>> map, T key, Employee empl) {
@@ -37,13 +59,18 @@ public class CompanyImpl implements Company {
 
 	@Override
 	public Employee removeEmployee(long id) {
-		Employee empl = employees.remove(id);
-		if (empl != null) {
-			removeIndexMap(employeesMonth, empl.getBirthDate().getMonthValue(), empl);
-			removeIndexMap(employeesDepartment, empl.getDepartment(), empl);
-			removeIndexMap(employeesSalary, empl.getSalary(), empl);
+		lock(writeEmployeesLock, writeEmployeesMonthLock, writeEmployeesDepartmentLock, writeEmployeesSalaryLock);
+		try {
+			Employee empl = employees.remove(id);
+			if (empl != null) {
+				removeIndexMap(employeesMonth, empl.getBirthDate().getMonthValue(), empl);
+				removeIndexMap(employeesDepartment, empl.getDepartment(), empl);
+				removeIndexMap(employeesSalary, empl.getSalary(), empl);
+			}
+			return empl;
+		} finally {
+			unlock(writeEmployeesLock, writeEmployeesMonthLock, writeEmployeesDepartmentLock, writeEmployeesSalaryLock);
 		}
-		return empl;
 	}
 
 	private <T> void removeIndexMap(Map<T, Set<Employee>> map, T key, Employee empl) {
@@ -57,33 +84,55 @@ public class CompanyImpl implements Company {
 
 	@Override
 	public List<Employee> getAllEmployees() {
-
-		return new ArrayList<>(employees.values());
+		lock(readEmployeesLock);
+		try {
+			return new ArrayList<>(employees.values());
+		} finally {
+			unlock(readEmployeesLock);
+		}
 	}
 
 	@Override
 	public List<Employee> getEmployeesByMonthBirth(int month) {
-
-		return new ArrayList<>(employeesMonth.getOrDefault(month, Collections.emptySet()));
+		lock(readEmployeesMonthLock);
+		try {
+			return new ArrayList<>(employeesMonth.getOrDefault(month, Collections.emptySet()));
+		} finally {
+			unlock(readEmployeesMonthLock);
+		}
 	}
 
 	@Override
 	public List<Employee> getEmployeesBySalary(int salaryFrom, int salaryTo) {
-
-		return employeesSalary.subMap(salaryFrom, true, salaryTo, true).values().stream().flatMap(Set::stream).toList();
+		lock(readEmployeesSalaryLock);
+		try {
+			return employeesSalary.subMap(salaryFrom, true, salaryTo, true).values().stream().flatMap(Set::stream)
+					.toList();
+		} finally {
+			unlock(readEmployeesSalaryLock);
+		}
 	}
 
 	@Override
 	public List<Employee> getEmployeesByDepartment(String department) {
-
-		return new ArrayList<>(employeesDepartment.getOrDefault(department, Collections.emptySet()));
+		lock(readEmployeesDepartmentLock);
+		try {
+			return new ArrayList<>(employeesDepartment.getOrDefault(department, Collections.emptySet()));
+		} finally {
+			unlock(readEmployeesDepartmentLock);
+		}
 	}
 
 	@Override
 	public Employee getEmployee(long id) {
-
-		return employees.get(id);
+		lock(readEmployeesLock);
+		try {
+			return employees.get(id);
+		} finally {
+			unlock(readEmployeesLock);
+		}
 	}
+
 
 	@Override
 	public void save(String pathName) {
@@ -94,6 +143,7 @@ public class CompanyImpl implements Company {
 		}
 
 	}
+
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -107,6 +157,59 @@ public class CompanyImpl implements Company {
 			throw new RuntimeException(e.toString()); // some error
 		}
 
+	}
+
+	@Override
+	public Employee updateSalary(long emplId, int newSalary) {
+		lock(writeEmployeesLock, writeEmployeesSalaryLock);
+		try {
+			Employee empl = employees.get(emplId);
+			if (empl != null) {
+				removeIndexMap(employeesSalary, empl.getSalary(), empl);
+
+				Employee updatedEmpl = new Employee(empl.getId(), empl.getName(), empl.getBirthDate(),
+						empl.getDepartment(), newSalary);
+				employees.put(emplId, updatedEmpl);
+
+				addIndexMap(employeesSalary, updatedEmpl.getSalary(), updatedEmpl);
+			}
+			return empl;
+		} finally {
+			unlock(writeEmployeesLock, writeEmployeesSalaryLock);
+		}
+
+	}
+
+	@Override
+	public Employee updateDepartment(long emplId, String department) {
+		lock(writeEmployeesLock, writeEmployeesDepartmentLock);
+		try {
+			Employee empl = employees.get(emplId);
+			if (empl != null) {
+				removeIndexMap(employeesDepartment, empl.getDepartment(), empl);
+
+				Employee updatedEmpl = new Employee(empl.getId(), empl.getName(), empl.getBirthDate(), department,
+						empl.getSalary());
+				employees.put(emplId, updatedEmpl);
+
+				addIndexMap(employeesDepartment, updatedEmpl.getDepartment(), updatedEmpl);
+			}
+			return empl;
+		} finally {
+			unlock(writeEmployeesLock, writeEmployeesDepartmentLock);
+		}
+	}
+
+	private void lock(Lock... locks) {
+		for (Lock lock : locks) {
+			lock.lock();
+		}
+	}
+
+	private void unlock(Lock... locks) {
+		for (Lock lock : locks) {
+			lock.unlock();
+		}
 	}
 
 }
