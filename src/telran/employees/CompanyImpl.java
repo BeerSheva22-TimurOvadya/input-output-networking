@@ -161,7 +161,7 @@ public class CompanyImpl implements Company {
 
 	@Override
 	public Employee updateSalary(long emplId, int newSalary) {
-		lock(writeEmployeesLock, writeEmployeesSalaryLock);
+		lock(readEmployeesLock, writeEmployeesSalaryLock);
 		try {
 			Employee empl = employees.get(emplId);
 			if (empl != null) {
@@ -175,14 +175,14 @@ public class CompanyImpl implements Company {
 			}
 			return empl;
 		} finally {
-			unlock(writeEmployeesLock, writeEmployeesSalaryLock);
+			unlock(readEmployeesLock, writeEmployeesSalaryLock);
 		}
 
 	}
 
 	@Override
 	public Employee updateDepartment(long emplId, String department) {
-		lock(writeEmployeesLock, writeEmployeesDepartmentLock);
+		lock(readEmployeesLock, writeEmployeesDepartmentLock);
 		try {
 			Employee empl = employees.get(emplId);
 			if (empl != null) {
@@ -191,12 +191,12 @@ public class CompanyImpl implements Company {
 				Employee updatedEmpl = new Employee(empl.getId(), empl.getName(), empl.getBirthDate(), department,
 						empl.getSalary());
 				employees.put(emplId, updatedEmpl);
-
+				
 				addIndexMap(employeesDepartment, updatedEmpl.getDepartment(), updatedEmpl);
 			}
 			return empl;
 		} finally {
-			unlock(writeEmployeesLock, writeEmployeesDepartmentLock);
+			unlock(readEmployeesLock, writeEmployeesDepartmentLock);
 		}
 	}
 
