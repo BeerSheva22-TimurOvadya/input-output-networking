@@ -15,7 +15,6 @@ public class EmployeeClientAppl {
 		InputOutput io = new StandardInputOutput();
 		NetworkClient client = new TcpClient("localhost", 4000);
 		Company company = new CompanyNetProxy(client);
-		company.restore(FILE_PATH);
 		Item[] companyItems = CompanyControllerItems.getCompanyItems
 				(company, new String[] {"QA", "Development", "Audit",
 						"Management", "Accounting"});
@@ -23,7 +22,6 @@ public class EmployeeClientAppl {
 		items.add(Item.of("Exit & save", io1 -> company.save(FILE_PATH), true));
 		Menu menu = new Menu("Company Application", items);
 		menu.perform(io);
-
 	}
 
 }

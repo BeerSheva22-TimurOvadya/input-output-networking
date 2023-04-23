@@ -1,5 +1,4 @@
 package telran.util;
-
 import java.io.*;
 import java.net.*;
 import java.time.LocalDateTime;
@@ -7,15 +6,15 @@ import java.time.ZoneId;
 
 import telran.net.application.ServerLogAppl;
 
+
 public class TcpClientHandler implements Handler {
 	private static final String LOG_TYPE_REQUEST = "log";
 	private static final String OK = "ok";
 	Socket socket;
 	PrintStream stream;
 	BufferedReader input;
-
 	public TcpClientHandler(String hostName, int port) {
-
+		
 		try {
 			socket = new Socket(hostName, port);
 			stream = new PrintStream(socket.getOutputStream());
@@ -25,12 +24,15 @@ public class TcpClientHandler implements Handler {
 		}
 	}
 
+	
+
 	@Override
 	public void publish(LoggerRecord loggerRecord) {
-		LocalDateTime ldt = LocalDateTime.ofInstant(loggerRecord.timestamp, ZoneId.of(loggerRecord.zoneId));
-		String message = String.format("%s %s %s %s", ldt, loggerRecord.level, loggerRecord.loggerName,
-				loggerRecord.message);
-		stream.println(LOG_TYPE_REQUEST + "#" + message);
+		LocalDateTime ldt = LocalDateTime.ofInstant(loggerRecord.timestamp,
+				ZoneId.of(loggerRecord.zoneId));
+		String message = String.format("%s %s %s %s", ldt, loggerRecord.level,
+				loggerRecord.loggerName, loggerRecord.message);
+		stream.println(ServerLogAppl.LOG_TYPE + "#" + message);
 		try {
 			String response = input.readLine();
 			if (!response.equals(ServerLogAppl.OK)) {
@@ -39,9 +41,9 @@ public class TcpClientHandler implements Handler {
 		} catch (IOException e) {
 			new RuntimeException(e.getMessage());
 		}
-
+		
+		
 	}
-
 	@Override
 	public void close() {
 		try {
@@ -50,5 +52,6 @@ public class TcpClientHandler implements Handler {
 			throw new RuntimeException("not closed " + e.getMessage());
 		}
 	}
+	
 
 }

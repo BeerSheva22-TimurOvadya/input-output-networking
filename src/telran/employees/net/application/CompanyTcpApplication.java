@@ -4,9 +4,7 @@ import java.util.Scanner;
 
 import telran.employees.Company;
 import telran.employees.CompanyImpl;
-import telran.employees.CompanyImplNoThreads;
 import telran.employees.net.CompanyProtocol;
-import telran.employees.net.CompanyProtocolSync;
 import telran.net.Protocol;
 import telran.net.TcpServer;
 
@@ -27,6 +25,7 @@ public class CompanyTcpApplication {
 			String line = scanner.nextLine();
 			if (line.equals("shutdown")) {
 				company.save(FILE_NAME);
+				server.shutdown(); 	
 				running = false;
 			}
 		}
