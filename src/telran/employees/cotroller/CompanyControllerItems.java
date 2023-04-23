@@ -40,9 +40,7 @@ public class CompanyControllerItems {
 	private static Item getAdminMenu() {
 
 		return new Menu("Admin actions", of("add employee", CompanyControllerItems::addEmployee),
-				of("Remove Employee", CompanyControllerItems::removeEmployee),
-				of("Update Salary", CompanyControllerItems::updateSalary),
-				of("Update Department", CompanyControllerItems::updateDepartment), exit());
+				of("Remove Employee", CompanyControllerItems::removeEmployee), exit());
 	}
 
 	private static Long getId(InputOutput io, boolean exist) {
@@ -54,38 +52,6 @@ public class CompanyControllerItems {
 	private static String getDepartment(InputOutput io) {
 		String department = io.readStringOptions("Enter Department " + departments, "Wrong Department", departments);
 		return department;
-	}
-
-	private static void updateDepartment(InputOutput io) {
-		Long id = getId(io, true);
-		String department = io.readStringOptions("Enter new Department " + departments, "Wrong Department", departments);
-		if (id == null) {
-			io.writeLine("Employee doesn't exist");
-		} else {
-			Employee empl = company.updateDepartment(id, department);
-			io.writeLine(empl != null ? "update Dapartment" : "not found");
-		}
-	}
-
-	private static void removeEmployee(InputOutput io) {
-		Long id = getId(io, true);
-		if (id == null) {
-			io.writeLine("Employee doesn't exist");
-		} else {
-			Employee empl = company.removeEmployee(id);
-			io.writeLine(empl != null ? "removed" : "not found");
-		}
-	}
-
-	private static void updateSalary(InputOutput io) {
-		Long id = getId(io, true);
-		int salary = io.readInt("Enter new Salary", "Wrong salary", MIN_SALARY, MAX_SALARY);
-		if (id == null) {
-			io.writeLine("Employee doesn't exist");
-		} else {
-			Employee empl = company.updateSalary(id, salary);
-			io.writeLine(empl != null ? "Update Salary" : "not found");
-		}
 	}
 
 	private static void addEmployee(InputOutput io) {
@@ -104,6 +70,16 @@ public class CompanyControllerItems {
 
 	private static int getSalary(InputOutput io) {
 		return io.readInt("Enter salary", "Wrong Salary", MIN_SALARY, MAX_SALARY);
+	}
+
+	private static void removeEmployee(InputOutput io) {
+		Long id = getId(io, true);
+		if (id == null) {
+			io.writeLine("Employee doesn't exist");
+		} else {
+			Employee empl = company.removeEmployee(id);
+			io.writeLine(empl != null ? "removed" : "not found");
+		}
 	}
 
 	private static void getAllEmployees(InputOutput io) {

@@ -3,26 +3,25 @@ package telran.net;
 import java.io.*;
 import static telran.net.UdpUtills.*;
 import java.net.*;
-
 public class UdpClient implements NetworkClient {
 	private String host;
 	private DatagramSocket socket;
 	private int port;
-
 	public UdpClient(String host, int port) {
 		this.host = host;
 		this.port = port;
 		try {
 			socket = new DatagramSocket();
-		} catch (Exception e) {
+		}catch (Exception e) {
 			throw new RuntimeException(e.toString());
 		}
-
+		
 	}
 
 	@Override
 	public void close() throws IOException {
 		socket.close();
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -30,10 +29,10 @@ public class UdpClient implements NetworkClient {
 	public <T> T send(String type, Serializable requestData) {
 		Request request = new Request(type, requestData);
 		try {
-			byte[] bufferSend = toBytesArray(request);
+			byte [] bufferSend = toBytesArray(request);
 			byte[] bufferReceive = new byte[MAX_BUFFER_LENGTH];
-			DatagramPacket packetSend = new DatagramPacket(bufferSend, bufferSend.length, InetAddress.getByName(host),
-					port);
+			DatagramPacket packetSend = new DatagramPacket(bufferSend, bufferSend.length,
+					InetAddress.getByName(host), port);
 			DatagramPacket packetReceive = new DatagramPacket(bufferReceive, MAX_BUFFER_LENGTH);
 			socket.send(packetSend);
 			socket.receive(packetReceive);
@@ -42,11 +41,12 @@ public class UdpClient implements NetworkClient {
 				throw new Exception(response.data.toString());
 			}
 			return (T) response.data;
-
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());
 		}
-
+		
 	}
 
+	
 }

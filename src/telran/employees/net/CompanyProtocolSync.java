@@ -13,10 +13,10 @@ import telran.net.Request;
 import telran.net.Response;
 import telran.net.ResponseCode;
 
-public class CompanyProtocol implements Protocol {
+public class CompanyProtocolSync implements Protocol {
 	Company company;
 	@Override
-	public  Response getResponse(Request request) {
+	public synchronized Response getResponse(Request request) {
 		Response response = null;
 		try {
 			Method method = getClass().getDeclaredMethod(request.type,
@@ -83,7 +83,7 @@ public class CompanyProtocol implements Protocol {
 		company.updateDepartment(idDepartment.id(), idDepartment.value());
 		return "";
 	}
-	public CompanyProtocol(Company company) {
+	public CompanyProtocolSync(Company company) {
 		this.company = company;
 	}
 	

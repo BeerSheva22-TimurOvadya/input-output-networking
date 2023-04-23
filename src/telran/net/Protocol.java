@@ -1,5 +1,5 @@
 package telran.net;
 
 public interface Protocol {
-	Response getResponse(Request request);
+Response getResponse(Request request);
 }
