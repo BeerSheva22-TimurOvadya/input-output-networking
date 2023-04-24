@@ -1,5 +1,6 @@
 package telran.employees.net.application;
 
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import telran.employees.Company;
@@ -9,25 +10,33 @@ import telran.net.Protocol;
 import telran.net.TcpServer;
 
 public class CompanyTcpApplication {
-	private static final String FILE_NAME = "company.data";
+	private static final int PORT = 4000;
+	private static final String FILE_NAME = "database.data";
 
 	public static void main(String[] args) throws Exception {
 		Company company = new CompanyImpl();
-		company.restore(FILE_NAME);
-		Protocol protocol = new CompanyProtocol(company);
-		TcpServer server = new TcpServer(protocol, 4000);
-		Thread thread = new Thread(server);
-		thread.start();
+		try {
+			company.restore(FILE_NAME);
+		} catch (RuntimeException e) {
+			System.out.println(e.getMessage());
+		}
+		Protocol serverProtocol = new CompanyProtocol(company);
+		TcpServer tcpServer = new TcpServer(serverProtocol, PORT);
+		Thread serverThread = new Thread(tcpServer);
+		serverThread.start();
 		Scanner scanner = new Scanner(System.in);
 		boolean running = true;
-		while (running) {
-			System.out.println("For stopping server enter command 'shutdown'");
-			String line = scanner.nextLine();
-			if (line.equals("shutdown")) {
+		while(running) {
+			System.out.println("For shutdown the server enter command 'shutdown'");
+			if (scanner.nextLine().equals("shutdown")) {
+				tcpServer.shutdown();
+				serverThread.join();
 				company.save(FILE_NAME);
-				server.shutdown(); 	
+				System.out.println(LocalDateTime.now().toString() + ": Company is saved");
 				running = false;
 			}
 		}
+		System.out.println(LocalDateTime.now().toString() + ": Programm was shutted down");
 	}
+
 }
